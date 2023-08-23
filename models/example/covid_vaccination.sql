@@ -1,3 +1,19 @@
-select * from "example".public.covid19_vaccination_insights LIMIT 10
--- Aggregations in the last 30 days
-select * from "example".public.covid19_vaccination_insights where date >= current_date - interval '30 days' LIMIT 10
+{{ config(
+    materialized='table',
+    tags=['aggregations']
+) }}
+
+with raw_data as (
+    select
+        "date",
+        "country_region",
+        "sni_covid19_vaccination"
+    from "example".public.covid19_vaccination_insights
+)
+
+select
+    "date",
+    "country_region",
+    sum("sni_covid19_vaccination") as total_vaccinations
+from raw_data
+group by 1, 2;
